@@ -21,7 +21,7 @@ param imagePublisher string = 'MicrosoftWindowsServer'
 @description('Offer for virtual machine image.')
 param imageOffer string = 'WindowsServer'
 @description('SKU of virtual machine image.')
-param imageSku string = '2019-Datacenter'
+param imageSku string = '2016-Datacenter'
 @description('Version of virtual machine image.')
 param imageVersion string = 'latest'
 @description('Name of operating system managed disk.')
@@ -42,13 +42,15 @@ param virtualNetworkDnsServers array = []
 param subnetName string = 'snet-guestconfig'
 @description('Address for virtual network subnet.')
 param subnetAddress string = '10.0.0.0/24'
+@description('Address for Azure Bastion Subnet')
+param bastionSubnetAddress string = '10.0.1.0/26'
 @description('Array of URLs of script files to download to virtual machine.')
 param scriptExtensionFileUris array = [
   'https://raw.githubusercontent.com/p1johnson/bicep-tools-guest-configuration/main/scripts/Configure.ps1'
-  'https://github.com/PowerShell/PowerShell/releases/download/v7.2.1/PowerShell-7.2.1-win-x64.msi'
+  'https://raw.githubusercontent.com/p1johnson/bicep-tools-guest-configuration/main/scripts/Modules.ps1'
 ]
 @description('Command to execute by script extension')
-param scriptExtensionCommandToExecute string = 'powershell Configure.ps1'
+param scriptExtensionCommandToExecute string = 'powershell -ExecutionPolicy Unrestricted -File ./Configure.ps1'
 
 param scriptExtensionTimestamp string = '${utcNow()}'
 
@@ -67,6 +69,12 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-05-01' = {
         name: subnetName
         properties: {
           addressPrefix: subnetAddress
+        }
+      }
+      {
+        name: 'AzureBastionSubnet'
+        properties: {
+          addressPrefix: bastionSubnetAddress
         }
       }
     ]
